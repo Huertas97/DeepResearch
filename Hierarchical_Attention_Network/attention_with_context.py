@@ -30,7 +30,10 @@ class AttentionWithContext(Layer):
     "Hierarchical Attention Networks for Document Classification"
     by using a context vector to assist the attention
     # Input shape
-        3D tensor with shape: `(samples, steps, features)`.
+        3D tensor with shape: `(samples, steps, features)`. 
+        samples = nº docs or nº of sentences (it depends on the level we are)
+        steps = nº of sentences per doc or nº of words per sentence
+        features = dimensions of the sentence or word embeddings
     # Output shape
         2D tensor with shape: `(samples, features)`.
     How to use:
@@ -97,6 +100,7 @@ class AttentionWithContext(Layer):
     # https://keras.io/guides/making_new_layers_and_models_via_subclassing/
     # https://www.tutorialspoint.com/keras/keras_customized_layer.htm
     def call(self, x, mask=None):
+        # x --> 3D tensor with shape: `(samples, steps, features)`. 
         # Following the formulas of HAN paper (Hierarchical Attention Networks for Document Classification)
         
         # FORMULA 5
@@ -127,7 +131,7 @@ class AttentionWithContext(Layer):
         # the denomimnator is the summatory of the numerator (look at the softmax formula)
         a /= K.cast(K.sum(a, axis=1, keepdims=True) + K.epsilon(), K.floatx()) 
         
-        a = K.expand_dims(a)
+        a = K.expand_dims(a) # Añade una dimension
         
         # FORMULA 7
         # Now we multiply each 'original' hidden state by its attention value
