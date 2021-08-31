@@ -144,4 +144,12 @@ class AttentionWithContext(Layer):
     # Line 2 computes the output shape using shape of input data and output dimension set while initializing the layer.
     # https://www.tutorialspoint.com/keras/keras_customized_layer.htm
     def compute_output_shape(self, input_shape):
-        return input_shape[0], input_shape[-1]
+        # The output will be 2D tensor with shape: `(samples, features)`. 
+        # samples = nº docs or nº of sentences (it depends on the level we are)
+        # features = dimensions of the sentence or word embeddings
+        # input_shape[0] is the number of sentences or documents
+        # input_shape[-1] is the dimension of the sequence of word or sentence embeddings. The output will have 
+        # for each sentence or document the same dimensions as the word or sentence embedding by weighting adding 
+        # this word or sentence embedding by its attention score. 
+        return input_shape[0], input_shape[-1] 
+        
