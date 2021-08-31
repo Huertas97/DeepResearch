@@ -65,6 +65,7 @@ class AttentionWithContext(Layer):
     
     # In the Keras API, we recommend creating layer weights in the build(self, inputs_shape) method of your layer
     # https://keras.io/guides/making_new_layers_and_models_via_subclassing/
+    # https://www.tutorialspoint.com/keras/keras_customized_layer.htm
     def build(self, input_shape):
         assert len(input_shape) == 3
 
@@ -94,6 +95,7 @@ class AttentionWithContext(Layer):
     
     # The __call__() method of your layer will automatically run build the first time it is called. 
     # https://keras.io/guides/making_new_layers_and_models_via_subclassing/
+    # https://www.tutorialspoint.com/keras/keras_customized_layer.htm
     def call(self, x, mask=None):
         # Following the formulas of HAN paper (Hierarchical Attention Networks for Document Classification)
         
