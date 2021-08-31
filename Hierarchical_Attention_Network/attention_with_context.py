@@ -61,7 +61,10 @@ class AttentionWithContext(Layer):
 
         self.bias = bias
         super(AttentionWithContext, self).__init__(**kwargs)
-
+    
+    
+    # In the Keras API, we recommend creating layer weights in the build(self, inputs_shape) method of your layer
+    # https://keras.io/guides/making_new_layers_and_models_via_subclassing/
     def build(self, input_shape):
         assert len(input_shape) == 3
 
@@ -88,29 +91,46 @@ class AttentionWithContext(Layer):
     def compute_mask(self, input, input_mask=None):
         # do not pass the mask to the next layers
         return None
-
+    
+    # The __call__() method of your layer will automatically run build the first time it is called. 
+    # https://keras.io/guides/making_new_layers_and_models_via_subclassing/
     def call(self, x, mask=None):
-        uit = dot_product(x, self.W)
-
+        # Following the formulas of HAN paper (Hierarchical Attention Networks for Document Classification)
+        
+        # FORMULA 5
+        # create the hidden representation of the hidden state (we will call it 'original')
+        uit = dot_product(x, self.W) 
+        
+        # if bias is included added to the hidden representation of the hidden state
+        # Just how a single dense layer works
         if self.bias:
             uit += self.b
 
         uit = K.tanh(uit)
+        
+        # FORMULA 6
         ait = dot_product(uit, self.u)
 
-        a = K.exp(ait)
+        a = K.exp(ait) # numerator of the softmax function
 
         # apply mask after the exp. will be re-normalized next
         if mask is not None:
             # Cast the mask to floatX to avoid float64 upcasting in theano
-            a *= K.cast(mask, K.floatx())
+            a *= K.cast(mask, K.floatx()) # we select the masking positions and apply them to the numerator
 
         # in some cases especially in the early stages of training the sum may be almost zero
         # and this results in NaN's. A workaround is to add a very small positive number ε to the sum.
         # a /= K.cast(K.sum(a, axis=1, keepdims=True), K.floatx())
-        a /= K.cast(K.sum(a, axis=1, keepdims=True) + K.epsilon(), K.floatx())
-
+        # cast change th dtype. Here we are completing the softmax function. Divide the numerator by the denominator
+        # the denomimnator is the summatory of the numerator (look at the softmax formula)
+        a /= K.cast(K.sum(a, axis=1, keepdims=True) + K.epsilon(), K.floatx()) 
+        
         a = K.expand_dims(a)
+        
+        # FORMULA 7
+        # Now we multiply each 'original' hidden state by its attention value
+        # Then we add all this weighted values. We are weighting the original 
+        # hidden states by it importance. This is what attention consists of. 
         weighted_input = x * a
         return K.sum(weighted_input, axis=1)
 
