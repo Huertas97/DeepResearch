@@ -139,6 +139,9 @@ class AttentionWithContext(Layer):
         # hidden states by it importance. This is what attention consists of. 
         weighted_input = x * a
         return K.sum(weighted_input, axis=1)
-
+    
+    # Line 1 defines compute_output_shape method with one argument input_shape
+    # Line 2 computes the output shape using shape of input data and output dimension set while initializing the layer.
+    # https://www.tutorialspoint.com/keras/keras_customized_layer.htm
     def compute_output_shape(self, input_shape):
         return input_shape[0], input_shape[-1]
